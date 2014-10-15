@@ -96,5 +96,33 @@ rig = (block, config, graph, params, items) ->
 
   return mediaQueries.join '\n\n'
 
+rig.simple = (block, config, selector, graph, params, breaks, dimension) ->
+
+  if not graph
+    graph = 'passthrough'
+  if not params
+    params = {}
+  if not dimension
+    dimension = 'width'
+  if not breaks
+    breaks = [ 400, 800, 1600 ]
+
+  items = []
+  for idx in [0...breaks.length]
+    br = breaks[idx]
+    size = if idx == breaks.length-1 then br else br-1
+    query = if idx == 0
+      "(max-#{dimension}: #{br-1}px)"
+    else if idx == breaks.length-1
+      "(min-#{dimension}: #{breaks[idx-1]}px)"
+    else
+      "(min-#{dimension}: #{breaks[idx-1]}px) and (max-#{dimension}: #{br-1}px)"
+    item =
+      selector: selector
+      query: query
+    item[dimension] = size
+    items.push item
+
+   return rig block, config, graph, params, items
 
 module.exports = rig
