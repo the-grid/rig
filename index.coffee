@@ -21,7 +21,11 @@ _ = require 'underscore'
 #   }, {
 #     query: '(min-width: 504px) and (max-width: 1007px)'
 #     selector: '.media, .background'
-#     height: 450
+#     width: 800
+#   }, {
+#     query: '(min-width: 1008px)'
+#     selector: '.media, .background'
+#     height: 1200
 #   }]
 #
 #   $ 'style', { type: 'text/css' }, css
