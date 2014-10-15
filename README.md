@@ -1,4 +1,4 @@
-# rig
+# rig [![Build Status](https://travis-ci.org/the-grid/rig.svg?branch=master)](https://travis-ci.org/the-grid/rig)
 
 Responsive image generator.
 
