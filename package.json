@@ -1,0 +1,36 @@
+{
+  "name": "rig-up",
+  "version": "0.1.0",
+  "description": "Responsive image generator.",
+  "keywords": [
+    "responsive",
+    "responsive images",
+    "media queries"
+  ],
+  "homepage": "https://github.com/the-grid/rig",
+  "bugs": "https://github.com/the-grid/rig/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Paul Young",
+    "url": "https://github.com/paulyoung"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/the-grid/rig.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha spec --compilers coffee:coffee-script/register --reporter spec"
+  },
+  "dependencies": {
+    "imgflo-url": "^0.2.0",
+    "underscore": "^1.7.0"
+  },
+  "devDependencies": {
+    "chai": "^1.9.2",
+    "coffee-script": "^1.8.0",
+    "mocha": "^1.21.5"
+  },
+  "engines": {
+    "node": "~0.10.26"
+  }
+}
