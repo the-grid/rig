@@ -22,7 +22,7 @@
     "test": "./node_modules/.bin/mocha spec --compilers coffee:coffee-script/register --reporter spec"
   },
   "dependencies": {
-    "imgflo-url": "^0.2.0",
+    "imgflo-url": "^0.3.0",
     "underscore": "^1.7.0"
   },
   "devDependencies": {
