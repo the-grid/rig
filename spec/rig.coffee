@@ -592,3 +592,41 @@ describe 'Responsive image generator', ->
               }
             }
           """
+
+    describe 'using simple breaks on single element', ->
+
+      it 'should generate equivalent media query to full notation', ->
+
+          fakeBlock =
+            type: 'media'
+            cover:
+              src: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+          config =
+            server: 'https://imgflo.herokuapp.com/'
+            key: process.env.IMGFLO_KEY
+            secret: process.env.IMGFLO_SECRET
+
+          params =
+            'std-dev-x': 15
+            'std-dev-y': 15
+          selector = '#my-favorite-id'
+
+          ref = rig fakeBlock, config, 'gaussianblur', params, [
+            query: '(max-width: 399px)'
+            selector: selector
+            width: 399
+          ,
+            query: '(min-width: 400px) and (max-width: 589px)'
+            selector: selector
+            width: 589
+          ,
+            query: '(min-width: 590px)'
+            selector: selector
+            width: 1368
+          ]
+
+          css = rig.simple fakeBlock, config, selector, 'gaussianblur', params, [400, 590, 1368], 'width'
+          expect(css).to.equal ref
