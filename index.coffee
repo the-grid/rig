@@ -5,8 +5,10 @@ _ = require 'underscore'
 #
 # @example
 #
-#   $ = require 'gom'
+#   GOM = require 'gom'
 #   rig = require 'rig-up'
+#
+#   $ = GOM()
 #
 #   config = solution.config.image_filters
 #
