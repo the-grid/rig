@@ -6,7 +6,7 @@ _ = require 'underscore'
 # @example
 #
 #   $ = require 'gom'
-#   rig = require 'rig'
+#   rig = require 'rig-up'
 #
 #   config = solution.config.image_filters
 #
