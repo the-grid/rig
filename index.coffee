@@ -167,7 +167,7 @@ rig =
 
     return @generate block, config, graph, params, items
 
-  generateSrcset: (imgSrc, imgSize, breakpoints, imgfloServerConfig, imgfloGraphName, imgfloGraphParams) ->
+  generateSrcset: (imgSrc, imgSize, breakpoints, imgfloServerConfig, imgfloGraphName, imgfloGraphParams = {}) ->
 
     additionalParams =
       input: imgSrc
