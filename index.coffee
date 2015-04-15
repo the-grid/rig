@@ -167,5 +167,36 @@ rig =
 
     return @generate block, config, graph, params, items
 
+  generateSrcset: (imgSrc, imgSize, breakpoints, imgfloServerConfig, imgfloGraphName, imgfloGraphParams) ->
+
+    additionalParams =
+      input: imgSrc
+      width: imgSize[0]
+      height: imgSize[1]
+
+    fullParams = _.extend additionalParams, imgfloGraphParams
+
+    result =
+      src: imgflo imgfloServerConfig, imgfloGraphName, fullParams
+      sizes: "sizes='100vw'"
+
+    srcset = ""
+
+    for breakpoint in breakpoints
+      breakRatio = breakpoint / imgSize[0]
+      resizeWidth = imgSize[0] * breakRatio
+      resizeHeight = imgSize[1] * breakRatio
+
+      additionalParams =
+        input: imgSrc
+        width: resizeWidth
+        height: resizeHeight
+
+      fullParams = _.extend additionalParams, imgfloGraphParams
+      url = imgflo imgfloServerConfig, imgfloGraphName, fullParams
+      srcset += "#{url} #{resizeWidth}w,"
+
+    result.srcset = srcset.substring(0, srcset.length - 1)
+    return result
 
 module.exports = rig

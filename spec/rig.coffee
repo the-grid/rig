@@ -1034,3 +1034,21 @@ describe 'Responsive image generator', ->
           }
         }
       """
+
+    it 'should generate srcset image', ->
+
+      # imgSrc, imgSize, breakpoints, imgfloConfig, imgfloGraph, imgfloParams
+      imgSrc = "http://www.owenwilson.com.au/system/files/imagecache/product_full/OWB0035%2520%2520Southern%2520Cassowary%2520Swallowing%2520Berry%2520%2520close%2520up%2520%2520_DSC4532.jpg"
+      size = [1000,665]
+      breakpoints = [200,600]
+      imgfloConfig =
+        server: 'https://imgflo.herokuapp.com/'
+        key: process.env.IMGFLO_KEY
+        secret: process.env.IMGFLO_SECRET
+      imgfloparams = {}
+      rigresult = rig.generateSrcset imgSrc, size, breakpoints, imgfloConfig, "passthrough", imgfloparams
+
+      expect(rigresult).to.deep.equal
+        src: "https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/53e5ca663fd6954f6882cbed6fd183ec/passthrough.jpg?input=http%3A%2F%2Fwww.owenwilson.com.au%2Fsystem%2Ffiles%2Fimagecache%2Fproduct_full%2FOWB0035%252520%252520Southern%252520Cassowary%252520Swallowing%252520Berry%252520%252520close%252520up%252520%252520_DSC4532.jpg&width=1000&height=665"
+        sizes: "sizes='100vw'"
+        srcset: "https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/1ca8ca1063a60ba2068a63d2d093e1af/passthrough.jpg?input=http%3A%2F%2Fwww.owenwilson.com.au%2Fsystem%2Ffiles%2Fimagecache%2Fproduct_full%2FOWB0035%252520%252520Southern%252520Cassowary%252520Swallowing%252520Berry%252520%252520close%252520up%252520%252520_DSC4532.jpg&width=200&height=133 200w,https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/30f70a38991403c25a376924f67d04ab/passthrough.jpg?input=http%3A%2F%2Fwww.owenwilson.com.au%2Fsystem%2Ffiles%2Fimagecache%2Fproduct_full%2FOWB0035%252520%252520Southern%252520Cassowary%252520Swallowing%252520Berry%252520%252520close%252520up%252520%252520_DSC4532.jpg&width=600&height=399 600w"
