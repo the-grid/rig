@@ -257,11 +257,14 @@ rig =
     fullParams[key] = value for key, value of params
     fullParams[key] = value for key, value of additionalParams
 
+    src = imgflo config, graph, fullParams
+
     result =
-      src: imgflo config, graph, fullParams
+      src: src
 
     srcset = []
-    sorted = breakpoints.sort (a, b) -> a - b
+    filtered = (breakpoint for breakpoint in breakpoints when breakpoint < cover.width)
+    sorted = filtered.sort (a, b) -> a - b
 
     for breakpoint in sorted
       additionalParams =
@@ -276,6 +279,8 @@ rig =
       url = imgflo config, graph, fullParams
 
       srcset.push "#{url} #{breakpoint}w"
+
+    srcset.push "#{src} #{cover.width}w" if breakpoints.length > filtered.length
 
     result.srcset = srcset.join ", "
     result

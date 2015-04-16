@@ -1078,3 +1078,102 @@ describe 'Responsive image generator', ->
 
           expect(result.src).to.equal url
           expect(result.srcset).to.equal "#{firstUrl} 200w, #{secondUrl} 600w"
+
+
+      describe 'breakpoints equal to the image width', ->
+
+        breakpoints = [1600]
+
+        it 'should produce a single srcset entry equal the image width', ->
+          {block, config, graph} = fixtures
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
+
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 1600
+            height: 900
+
+          expect(result.src).to.equal url
+          expect(result.srcset).to.equal "#{url} 1600w"
+
+
+      describe 'breakpoints greater than the image width', ->
+
+        context 'single', ->
+
+          breakpoints = [2000]
+
+          it 'should produce a single srcset entry equal the image width', ->
+            {block, config, graph} = fixtures
+
+            result = rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+            url = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+            expect(result.src).to.equal url
+            expect(result.srcset).to.equal "#{url} 1600w"
+
+
+        context 'multiple', ->
+
+          breakpoints = [2000, 2400]
+
+          it 'should produce a single srcset entry equal the image width', ->
+            {block, config, graph} = fixtures
+
+            result = rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+            url = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+            expect(result.src).to.equal url
+            expect(result.srcset).to.equal "#{url} 1600w"
+
+
+      describe 'breakpoints less than, equal to, and greater than the image width', ->
+
+          breakpoints = [1200, 1600, 2000, 2400]
+
+          it 'should not produce srcset entries greater than the image width', ->
+            {block, config, graph} = fixtures
+
+            result = rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+            url = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+            firstUrl = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1200
+              height: (1200 / 1600) * 900
+
+            expect(result.src).to.equal url
+            expect(result.srcset).to.equal "#{firstUrl} 1200w, #{url} 1600w"
