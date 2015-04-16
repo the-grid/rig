@@ -18,6 +18,27 @@ validate = (block, config, graph) ->
 #
 rig =
 
+  # Item
+  #
+  # A dictionary representing a desired media query.
+  #
+  # @example
+  #
+  #   item =
+  #     query: "(max-width: 768px)"
+  #     selector: ".background"
+  #     width: 768
+  #
+  # @property query [String] A CSS media query declaration, without the @media
+  #   prefix or trailing {.
+  # @property selector [String] One or more CSS selectors as declared in a
+  #   ruleset, without the trailing {.
+  # @property width [Number] The width of the desired image. Must not be
+  #   provided with "height".
+  # @property height [Number] The height of the desired image. Must not be
+  #   provided with "width".
+
+
   # Generate media queries for a single image and graph combination.
   #
   # @example
@@ -47,23 +68,18 @@ rig =
   #
   #   $ 'style', { type: 'text/css' }, css
   #
-  # @param block [Object] The content block.
-  # @param config [Object] An imgflo server config object.
-  # @param graph [String] The name of the imgflo graph.
-  # @param params [Object] The parameters to be passed to imgflo.
-  # @param items [Array<Object>] A list of items representing the desired media
-  #   queries.
-  # @option items query [String] A CSS media query declaration, without the @media
-  #   prefix or trailing {.
-  # @option items selector [String] One or more CSS selectors as declared in a
-  #   ruleset, without the trailing {.
-  # @option items width [Number] The width of the desired image. Must not be
-  #   provided with "height".
-  # @option items height [Number] The height of the desired image. Must not be
-  #   provided with "width".
+  # @param options [Object] The media query generation options.
+  # @option options block [Object] The content block.
+  # @option options config [Object] An imgflo server config object.
+  # @option options graph [String] The name of the imgflo graph.
+  # @option options params [Object] The parameters to be passed to imgflo.
+  # @option options items [Array<Item>] A list of items representing the
+  #   desired media queries.
   # @return [String] The generated CSS media queries.
   #
-  generate: (block, config, graph, params, items) ->
+  generate: (options) ->
+    {block, config, graph, params, items} = options
+
     validate block, config, graph
     throw new Error 'query items not provided' unless items?
 
@@ -121,18 +137,21 @@ rig =
   #
   #   $ 'style', { type: 'text/css' }, css
   #
-  # @param block [Object] The content block.
-  # @param config [Object] An imgflo server config object.
-  # @param graph [String] The name of the imgflo graph.
-  # @param params [Object] The parameters to be passed to imgflo.
-  # @param selector [String] One or more CSS selectors as declared in a
+  # @param options [Object] The media query generation options.
+  # @option options block [Object] The content block.
+  # @option options config [Object] An imgflo server config object.
+  # @option options graph [String] The name of the imgflo graph.
+  # @option options params [Object] The parameters to be passed to imgflo.
+  # @option options selector [String] One or more CSS selectors as declared in a
   #   ruleset, without the trailing {.
-  # @param property [String] Valid values are 'width' or 'height'.
-  # @param items [Array<Number>] A list of numbers representing breakpoints for
-  #   the desired media queries.
+  # @option options property [String] Valid values are 'width' or 'height'.
+  # @option options items [Array<Number>] A list of numbers representing
+  #   breakpoints for the desired media queries.
   # @return [String] The generated CSS media queries.
   #
-  breakpoints: (block, config, graph, params, property, selector, breakpoints) ->
+  breakpoints: (options) ->
+    {block, config, graph, params, property, selector, breakpoints} = options
+
     validate block, config, graph
     throw new Error 'property not provided' unless property?
     throw new Error 'invalid property provided' if property isnt 'width' and property isnt 'height'
@@ -167,7 +186,12 @@ rig =
         item[property] = min
         items.push item
 
-    @generate block, config, graph, params, items
+    @generate
+      block: block
+      config: config
+      graph: graph
+      params: params
+      items: items
 
 
   # Generate src and srcset attribute values for a single image and graph
@@ -189,15 +213,18 @@ rig =
   #
   #   $ 'img', { src: result.src, srcset: result.srcset, sizes: '100vw' }
   #
-  # @param block [Object] The content block.
-  # @param config [Object] An imgflo server config object.
-  # @param graph [String] The name of the imgflo graph.
-  # @param params [Object] The parameters to be passed to imgflo.
-  # @param items [Array<Number>] A list of numbers representing breakpoints for
-  #   the desired media queries.
+  # @param options [Object] The attribute value generation options.
+  # @option options block [Object] The content block.
+  # @option options config [Object] An imgflo server config object.
+  # @option options graph [String] The name of the imgflo graph.
+  # @option options params [Object] The parameters to be passed to imgflo.
+  # @option options items [Array<Number>] A list of numbers representing
+  #   breakpoints for the desired srcset attribute values.
   # @return [Object] A dictionary containing `src` and `srcset` keys.
   #
-  srcset: (block, config, graph, params, breakpoints) ->
+  srcset: (options) ->
+    {block, config, graph, params, breakpoints} = options
+
     validate block, config, graph
     throw new Error 'breakpoints not provided' unless breakpoints?
 

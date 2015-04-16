@@ -141,11 +141,16 @@ describe 'Responsive image generator', ->
   describe "generate", ->
 
     validate fixtures.block, fixtures.config, fixtures.graph, (block, config, graph) ->
-      rig.generate block, config, graph, {}, [{
-        query: '(max-width: 503px)'
-        selector: '.media, .background'
-        width: 800
-      }]
+      rig.generate
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        items: [{
+          query: '(max-width: 503px)'
+          selector: '.media, .background'
+          width: 800
+        }]
 
 
     describe 'without any query items', ->
@@ -155,7 +160,13 @@ describe 'Responsive image generator', ->
       it 'should throw an error', ->
         exercise = ->
           {block, config, graph} = fixtures
-          rig.generate block, config, graph, {}, items
+
+          rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
         expect(exercise).to.throw Error, 'query items not provided'
 
@@ -172,7 +183,13 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.generate block, config, graph, {}, items
+
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
 
           expect(exercise).to.throw Error, 'media query not provided'
 
@@ -187,7 +204,13 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.generate block, config, graph, {}, items
+
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
 
           expect(exercise).to.throw Error, 'selector not provided'
 
@@ -202,7 +225,13 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.generate block, config, graph, {}, items
+
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
 
           expect(exercise).to.throw Error, 'width or height not provided'
 
@@ -219,7 +248,13 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.generate block, config, graph, {}, items
+
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
 
           expect(exercise).to.throw Error, 'width or height must be provided, but not both'
 
@@ -234,7 +269,13 @@ describe 'Responsive image generator', ->
 
         it 'should use the original width', ->
           {block, config, graph} = fixtures
-          css = rig.generate block, config, graph, {}, items
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
           url = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -260,7 +301,13 @@ describe 'Responsive image generator', ->
 
         it 'should use the original height', ->
           {block, config, graph} = fixtures
-          css = rig.generate block, config, graph, {}, items
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
           url = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -292,7 +339,13 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.generate block, config, graph, {}, items
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -333,7 +386,13 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.generate block, config, graph, {}, items
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -374,7 +433,13 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.generate block, config, graph, {}, items
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -403,7 +468,6 @@ describe 'Responsive image generator', ->
 
         describe 'using a more complex imgflo graph', ->
 
-          {block, config} = fixtures
           graph = 'gaussianblur'
 
           params =
@@ -411,15 +475,22 @@ describe 'Responsive image generator', ->
             'std-dev-y': 15
 
           it 'should generate media queries', ->
-            css = rig.generate block, config, graph, params, [{
-              query: '(max-width: 503px)'
-              selector: '.media, .background'
-              width: 400
-            }, {
-              query: '(min-width: 504px) and (max-width: 1007px)'
-              selector: '.media, .background'
-              height: 450
-            }]
+            {block, config} = fixtures
+
+            css = rig.generate
+              block: block,
+              config: config,
+              graph: graph,
+              params: params,
+              items: [{
+                query: '(max-width: 503px)'
+                selector: '.media, .background'
+                width: 400
+              }, {
+                query: '(min-width: 504px) and (max-width: 1007px)'
+                selector: '.media, .background'
+                height: 450
+              }]
 
             firstUrl = imgflo config, 'gaussianblur',
               'std-dev-x': 15
@@ -453,10 +524,17 @@ describe 'Responsive image generator', ->
   describe 'breakpoints', ->
 
     validate fixtures.block, fixtures.config, fixtures.graph, (block, config, graph) ->
-      rig.breakpoints block, config, graph, {}, 'width', '.background', [800, 1200]
+      rig.breakpoints
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        property: 'width'
+        selector: '.background'
+        breakpoints: [800, 1200]
 
 
-    describe 'property param', ->
+    describe 'property option', ->
 
       context 'not provided', ->
 
@@ -465,7 +543,15 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.breakpoints block, config, graph, {}, property, '.background', [800, 1200]
+
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: property
+              selector: '.background'
+              breakpoints: [800, 1200]
 
           expect(exercise).to.throw Error, 'property not provided'
 
@@ -477,7 +563,15 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.breakpoints block, config, graph, {}, property, '.background', [800, 1200]
+
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: property
+              selector: '.background'
+              breakpoints: [800, 1200]
 
           expect(exercise).to.throw Error, 'invalid property provided'
 
@@ -488,7 +582,15 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.breakpoints block, config, graph, {}, property, '.background', [800, 1200]
+
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: property
+            selector: '.background'
+            breakpoints: [800, 1200]
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -532,7 +634,15 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.breakpoints block, config, graph, {}, property, '.background', [300, 600]
+
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: property
+            selector: '.background'
+            breakpoints: [300, 600]
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -570,7 +680,7 @@ describe 'Responsive image generator', ->
           """
 
 
-    describe 'selector param', ->
+    describe 'selector option', ->
 
       context 'not provided', ->
 
@@ -579,12 +689,20 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.breakpoints block, config, graph, {}, 'width', selector, [800, 1200]
+
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: 'width'
+              selector: selector
+              breakpoints: [800, 1200]
 
           expect(exercise).to.throw Error, 'selector not provided'
 
 
-    describe 'breakpoints param', ->
+    describe 'breakpoints option', ->
 
       context 'not provided', ->
 
@@ -593,7 +711,15 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.breakpoints block, config, graph, {}, 'width', '.background', breakpoints
+
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: 'width'
+              selector: '.background'
+              breakpoints: breakpoints
 
           expect(exercise).to.throw Error, 'breakpoints not provided'
 
@@ -604,7 +730,15 @@ describe 'Responsive image generator', ->
 
         it 'should generate ordered media queries', ->
           {block, config, graph} = fixtures
-          css = rig.breakpoints block, config, graph, {}, 'width', '.background', breakpoints
+
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: 'width'
+            selector: '.background'
+            breakpoints: breakpoints
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -648,7 +782,15 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.breakpoints block, config, graph, {}, 'width', '.background', breakpoints
+
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: 'width'
+            selector: '.background'
+            breakpoints: breakpoints
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -681,7 +823,15 @@ describe 'Responsive image generator', ->
 
         it 'should generate media queries', ->
           {block, config, graph} = fixtures
-          css = rig.breakpoints block, config, graph, {}, 'width', '.background', breakpoints
+
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: 'width'
+            selector: '.background'
+            breakpoints: breakpoints
 
           firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -720,8 +870,6 @@ describe 'Responsive image generator', ->
 
 
     it 'should generate media queries', ->
-      {config, graph} = fixtures
-
       block =
         type: 'media'
         cover:
@@ -729,8 +877,17 @@ describe 'Responsive image generator', ->
           width: 2160
           height: 1215
 
+      {config, graph} = fixtures
       breakpoints = [576, 864, 1152, 1440, 1728, 2016]
-      css = rig.breakpoints block, config, graph, {}, 'width', '.background', breakpoints
+
+      css = rig.breakpoints
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        property: 'width'
+        selector: '.background'
+        breakpoints: breakpoints
 
       firstUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
@@ -815,10 +972,15 @@ describe 'Responsive image generator', ->
   describe 'srcset', ->
 
     validate fixtures.block, fixtures.config, fixtures.graph, (block, config, graph) ->
-      rig.srcset block, config, graph, {}, [800, 1200]
+      rig.srcset
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        breakpoints: [800, 1200]
 
 
-    describe 'breakpoints param', ->
+    describe 'breakpoints option', ->
 
       context 'not provided', ->
 
@@ -827,7 +989,13 @@ describe 'Responsive image generator', ->
         it 'should throw an error', ->
           exercise = ->
             {block, config, graph} = fixtures
-            rig.srcset block, config, graph, {}, breakpoints
+
+            rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
 
           expect(exercise).to.throw Error, 'breakpoints not provided'
 
@@ -838,7 +1006,13 @@ describe 'Responsive image generator', ->
 
         it 'should generate ordered src and srcset attribute values', ->
           {block, config, graph} = fixtures
-          result = rig.srcset block, config, graph, {}, breakpoints
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
 
           url = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -865,7 +1039,13 @@ describe 'Responsive image generator', ->
 
         it 'should generate src and srcset attribute values', ->
           {block, config, graph} = fixtures
-          result = rig.srcset block, config, graph, {}, breakpoints
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
 
           url = imgflo config, graph,
             input: 'https://a.com/b.png'
@@ -887,7 +1067,13 @@ describe 'Responsive image generator', ->
 
         it 'should generate src and srcset attribute values', ->
           {block, config, graph} = fixtures
-          result = rig.srcset block, config, graph, {}, breakpoints
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
 
           url = imgflo config, graph,
             input: 'https://a.com/b.png'
