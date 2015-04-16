@@ -1,5 +1,18 @@
 imgflo = require 'imgflo-url'
-_ = require 'underscore'
+
+
+validate = (block, config, graph) ->
+  throw new Error 'block not provided' unless block?
+
+  {cover} = block
+  throw new Error 'block must have a cover image' unless cover?
+  throw new Error 'block cover image must have a src' unless cover.src?
+  throw new Error 'block cover image must have a width' unless cover.width?
+  throw new Error 'block cover image must have a height' unless cover.height?
+
+  throw new Error 'imgflo config not provided' unless config?
+  throw new Error 'imgflo graph name not provided' unless graph?
+
 
 # rig (responsive image generator)
 #
@@ -9,10 +22,8 @@ rig =
   #
   # @example
   #
-  #   GOM = require 'gom'
+  #   $ = do require 'gom'
   #   rig = require 'rig-up'
-  #
-  #   $ = GOM()
   #
   #   config = solution.config.image_filters
   #
@@ -20,7 +31,7 @@ rig =
   #     'std-dev-x': 15
   #     'std-dev-y': 15
   #
-  #   css = rig block, config, 'gaussianblur', params, [{
+  #   css = rig.generate block, config, 'gaussianblur', params, [{
   #     query: '(max-width: 503px)'
   #     selector: '.media, .background'
   #     width: 400
@@ -53,20 +64,10 @@ rig =
   # @return [String] The generated CSS media queries.
   #
   generate: (block, config, graph, params, items) ->
-
-    throw new Error 'block not provided' unless block?
-
-    {cover} = block
-    throw new Error 'block must have a cover image' unless cover?
-    throw new Error 'block cover image must have a src' unless cover.src?
-    throw new Error 'block cover image must have a width' unless cover.width?
-    throw new Error 'block cover image must have a height' unless cover.height?
-
-    throw new Error 'imgflo config not provided' unless config?
-    throw new Error 'imgflo graph name not provided' unless graph?
-
+    validate block, config, graph
     throw new Error 'query items not provided' unless items?
 
+    {cover} = block
     mediaQueries = []
 
     for item in items
@@ -89,7 +90,10 @@ rig =
         additionalParams.width = height * (cover.width / cover.height)
         additionalParams.height = height
 
-      fullParams = _.extend additionalParams, params
+      fullParams = {}
+      fullParams[key] = value for key, value of params
+      fullParams[key] = value for key, value of additionalParams
+
       url = imgflo config, graph, fullParams
 
       mediaQueries.push """
@@ -100,7 +104,7 @@ rig =
         }
       """
 
-    return mediaQueries.join '\n\n'
+    mediaQueries.join '\n\n'
 
 
   # Generate media queries for a single image, graph, and selector combination
@@ -108,10 +112,8 @@ rig =
   #
   # @example
   #
-  #   GOM = require 'gom'
+  #   $ = do require 'gom'
   #   rig = require 'rig-up'
-  #
-  #   $ = GOM()
   #
   #   config = solution.config.image_filters
   #   breakpoints = [576, 864, 1152, 1440, 1728, 2016]
@@ -131,7 +133,7 @@ rig =
   # @return [String] The generated CSS media queries.
   #
   breakpoints: (block, config, graph, params, property, selector, breakpoints) ->
-
+    validate block, config, graph
     throw new Error 'property not provided' unless property?
     throw new Error 'invalid property provided' if property isnt 'width' and property isnt 'height'
     throw new Error 'selector not provided' unless selector?
@@ -165,38 +167,73 @@ rig =
         item[property] = min
         items.push item
 
-    return @generate block, config, graph, params, items
+    @generate block, config, graph, params, items
 
-  generateSrcset: (imgSrc, imgSize, breakpoints, imgfloServerConfig, imgfloGraphName, imgfloGraphParams = {}) ->
+
+  # Generate src and srcset attribute values for a single image and graph
+  # combination at multiple breakpoints.
+  #
+  # @example
+  #
+  #   $ = do require 'gom'
+  #   rig = require 'rig-up'
+  #
+  #   config = solution.config.image_filters
+  #
+  #   params =
+  #     'std-dev-x': 15
+  #     'std-dev-y': 15
+  #
+  #   breakpoints = [576, 864, 1152, 1440, 1728, 2016]
+  #   result = rig.srcset block, config, 'gaussianblur', params, breakpoints
+  #
+  #   $ 'img', { src: result.src, srcset: result.srcset, sizes: '100vw' }
+  #
+  # @param block [Object] The content block.
+  # @param config [Object] An imgflo server config object.
+  # @param graph [String] The name of the imgflo graph.
+  # @param params [Object] The parameters to be passed to imgflo.
+  # @param items [Array<Number>] A list of numbers representing breakpoints for
+  #   the desired media queries.
+  # @return [Object] A dictionary containing `src` and `srcset` keys.
+  #
+  srcset: (block, config, graph, params, breakpoints) ->
+    validate block, config, graph
+    throw new Error 'breakpoints not provided' unless breakpoints?
+
+    {cover} = block
 
     additionalParams =
-      input: imgSrc
-      width: imgSize[0]
-      height: imgSize[1]
+      input: cover.src
+      width: cover.width
+      height: cover.height
 
-    fullParams = _.extend additionalParams, imgfloGraphParams
+    fullParams = {}
+    fullParams[key] = value for key, value of params
+    fullParams[key] = value for key, value of additionalParams
 
     result =
-      src: imgflo imgfloServerConfig, imgfloGraphName, fullParams
-      sizes: "sizes='100vw'"
+      src: imgflo config, graph, fullParams
 
-    srcset = ""
+    srcset = []
+    sorted = breakpoints.sort (a, b) -> a - b
 
-    for breakpoint in breakpoints
-      breakRatio = breakpoint / imgSize[0]
-      resizeWidth = imgSize[0] * breakRatio
-      resizeHeight = imgSize[1] * breakRatio
-
+    for breakpoint in sorted
       additionalParams =
-        input: imgSrc
-        width: resizeWidth
-        height: resizeHeight
+        input: cover.src
+        width: breakpoint
+        height: breakpoint / (cover.width / cover.height)
 
-      fullParams = _.extend additionalParams, imgfloGraphParams
-      url = imgflo imgfloServerConfig, imgfloGraphName, fullParams
-      srcset += "#{url} #{resizeWidth}w,"
+      fullParams = {}
+      fullParams[key] = value for key, value of params
+      fullParams[key] = value for key, value of additionalParams
 
-    result.srcset = srcset.substring(0, srcset.length - 1)
-    return result
+      url = imgflo config, graph, fullParams
+
+      srcset.push "#{url} #{breakpoint}w"
+
+    result.srcset = srcset.join ", "
+    result
+
 
 module.exports = rig
