@@ -52,19 +52,24 @@ rig =
   #     'std-dev-x': 15
   #     'std-dev-y': 15
   #
-  #   css = rig.generate block, config, 'gaussianblur', params, [{
-  #     query: '(max-width: 503px)'
-  #     selector: '.media, .background'
-  #     width: 400
-  #   }, {
-  #     query: '(min-width: 504px) and (max-width: 1007px)'
-  #     selector: '.media, .background'
-  #     width: 800
-  #   }, {
-  #     query: '(min-width: 1008px)'
-  #     selector: '.media, .background'
-  #     height: 1200
-  #   }]
+  #   css = rig.generate
+  #     block: block
+  #     config: config
+  #     graph: 'gaussianblur'
+  #     params: params
+  #     items: [{
+  #       query: '(max-width: 503px)'
+  #       selector: '.media, .background'
+  #       width: 400
+  #     }, {
+  #       query: '(min-width: 504px) and (max-width: 1007px)'
+  #       selector: '.media, .background'
+  #       width: 800
+  #     }, {
+  #       query: '(min-width: 1008px)'
+  #       selector: '.media, .background'
+  #       height: 1200
+  #     }]
   #
   #   $ 'style', { type: 'text/css' }, css
   #
@@ -133,7 +138,14 @@ rig =
   #
   #   config = solution.config.image_filters
   #   breakpoints = [576, 864, 1152, 1440, 1728, 2016]
-  #   css = rig.breakpoints block, config, 'passthrough', {}, '.background', breakpoints
+  #
+  #   css = rig.breakpoints
+  #     block: block
+  #     config: config
+  #     graph: 'passthrough'
+  #     params: {}
+  #     selector: '.background'
+  #     breakpoints: breakpoints
   #
   #   $ 'style', { type: 'text/css' }, css
   #
@@ -209,7 +221,13 @@ rig =
   #     'std-dev-y': 15
   #
   #   breakpoints = [576, 864, 1152, 1440, 1728, 2016]
-  #   result = rig.srcset block, config, 'gaussianblur', params, breakpoints
+  #
+  #   result = rig.srcset
+  #     block: block
+  #     config: config
+  #     graph: 'gaussianblur'
+  #     params: params
+  #     breakpoints: breakpoints
   #
   #   $ 'img', { src: result.src, srcset: result.srcset, sizes: '100vw' }
   #
