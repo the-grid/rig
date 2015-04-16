@@ -16,20 +16,6 @@ validateBlock = (fn) ->
 
   context 'with a block', ->
 
-    describe.skip 'of invalid type', ->
-
-      block =
-        type: 'text'
-        cover:
-          src: 'https://a.com/b.png'
-          width: 1600
-          height: 900
-
-      it 'should throw an error', ->
-        exercise = -> fn block
-        expect(exercise).to.throw Error, 'block must be of type "media" or a valid sub-type'
-
-
     describe 'without a cover image', ->
 
       block =
