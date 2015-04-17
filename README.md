@@ -2,7 +2,7 @@
 
 Responsive image generator.
 
-Generates media queries, and resizes images using [imgflo](https://github.com/jonnor/imgflo).
+Generates media queries and srcset attributes. Resizes images using [imgflo](https://github.com/jonnor/imgflo).
 
 
 ## Usage
