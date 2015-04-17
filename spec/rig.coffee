@@ -3,74 +3,26 @@ rig = require '../index'
 imgflo = require 'imgflo-url'
 
 
-describe 'Responsive image generator', ->
+validateBlock = (fn) ->
 
   describe 'without a block', ->
 
+    block = null
+
     it 'should throw an error', ->
-      exercise = ->
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
-
-        rig.generate null, config, 'passthrough', {}, [{
-          query: '(max-width: 503px)'
-          selector: '.media, .background'
-          width: 800
-        }]
-
+      exercise = -> fn block
       expect(exercise).to.throw Error, 'block not provided'
 
 
   context 'with a block', ->
 
-    describe.skip 'of invalid type', ->
-
-      it 'should throw an error', ->
-        exercise = ->
-          fakeBlock =
-            type: 'text'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
-
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
-
-          rig.generate fakeBlock, config, 'passthrough', {}, [{
-            query: '(max-width: 503px)'
-            selector: '.media, .background'
-            width: 800
-          }]
-
-        expect(exercise).to.throw Error, 'block must be of type "media" or a valid sub-type'
-
-
     describe 'without a cover image', ->
 
+      block =
+        type: 'media'
+
       it 'should throw an error', ->
-        exercise = ->
-          fakeBlock =
-            type: 'media'
-
-          params =
-            graph: 'passthrough'
-
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
-
-          rig.generate fakeBlock, config, 'passthrough', {}, [{
-            query: '(max-width: 503px)'
-            selector: '.media, .background'
-            width: 800
-          }]
-
+        exercise = -> fn block
         expect(exercise).to.throw Error, 'block must have a cover image'
 
 
@@ -78,330 +30,290 @@ describe 'Responsive image generator', ->
 
       describe 'without a src', ->
 
+        block =
+          type: 'media'
+          cover:
+            width: 1600
+            height: 900
+
         it 'should throw an error', ->
-          exercise = ->
-            fakeBlock =
-              type: 'media'
-              cover:
-                width: 1600
-                height: 900
-
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.generate fakeBlock, config, 'passthrough', {}, [{
-              query: '(max-width: 503px)'
-              selector: '.media, .background'
-              width: 800
-            }]
-
+          exercise = -> fn block
           expect(exercise).to.throw Error, 'block cover image must have a src'
 
 
       describe 'without a width', ->
 
+        block =
+          type: 'media'
+          cover:
+            src: 'https://a.com/b.png'
+            height: 900
+
         it 'should throw an error', ->
-          exercise = ->
-            fakeBlock =
-              type: 'media'
-              cover:
-                src: 'https://a.com/b.png'
-                height: 900
-
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.generate fakeBlock, config, 'passthrough', {}, [{
-              query: '(max-width: 503px)'
-              selector: '.media, .background'
-              width: 800
-            }]
-
+          exercise = -> fn block
           expect(exercise).to.throw Error, 'block cover image must have a width'
 
 
       describe 'without a height', ->
 
         it 'should throw an error', ->
-          exercise = ->
-            fakeBlock =
-              type: 'media'
-              cover:
-                src: 'https://a.com/b.png'
-                width: 1600
+          block =
+            type: 'media'
+            cover:
+              src: 'https://a.com/b.png'
+              width: 1600
 
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.generate fakeBlock, config, 'passthrough', {}, [{
-              query: '(max-width: 503px)'
-              selector: '.media, .background'
-              width: 800
-            }]
-
+          exercise = -> fn block
           expect(exercise).to.throw Error, 'block cover image must have a height'
 
 
+
+validateConfig = (fn) ->
+
   describe 'without an imgflo config object', ->
 
+    config = null
+
     it 'should throw an error', ->
-      exercise = ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
-            width: 1600
-            height: 900
-
-        rig.generate fakeBlock, null, 'passthrough', {}, [{
-          query: '(max-width: 503px)'
-          selector: '.media, .background'
-          width: 800
-        }]
-
+      exercise = -> fn config
       expect(exercise).to.throw Error, 'imgflo config not provided'
 
 
+
+validateGraph = (fn) ->
+
   describe 'without a graph name', ->
 
+    graph = null
+
     it 'should throw an error', ->
-      exercise = ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
-            width: 1600
-            height: 900
+      exercise = -> fn graph
+      expect(exercise).to.throw Error, 'imgflo graph name not provided'
 
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
 
-        rig.generate fakeBlock, config, null, {}, [{
+validate = (block, config, graph, fn) ->
+
+  validateBlock do (config, graph) ->
+    (block) -> fn block, config, graph
+
+  validateConfig do (block, graph) ->
+    (config) -> fn block, config, graph
+
+  validateGraph do (block, config) ->
+    (graph) -> fn block, config, graph
+
+
+
+describe 'Responsive image generator', ->
+
+  fixtures =
+
+    block:
+      type: 'media'
+      cover:
+        src: 'https://a.com/b.png'
+        width: 1600
+        height: 900
+
+    config:
+      server: 'https://imgflo.herokuapp.com/'
+      key: process.env.IMGFLO_KEY
+      secret: process.env.IMGFLO_SECRET
+
+    graph: "passthrough"
+
+
+
+  describe "generate", ->
+
+    validate fixtures.block, fixtures.config, fixtures.graph, (block, config, graph) ->
+      rig.generate
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        items: [{
           query: '(max-width: 503px)'
           selector: '.media, .background'
           width: 800
         }]
 
-      expect(exercise).to.throw Error, 'imgflo graph name not provided'
 
+    describe 'without any query items', ->
 
-  describe 'without any query items', ->
-
-    it 'should throw an error', ->
-      exercise = ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
-            width: 1600
-            height: 900
-
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
-
-        rig.generate fakeBlock, config, 'passthrough', {}
-
-      expect(exercise).to.throw Error, 'query items not provided'
-
-
-  context 'with a query item', ->
-
-    describe 'without a media query', ->
+      items = null
 
       it 'should throw an error', ->
         exercise = ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+          {block, config, graph} = fixtures
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+          rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
-          rig.generate fakeBlock,config, 'passthrough', {}, [{
-            selector: '.media, .background'
-            width: 800
-          }]
-
-        expect(exercise).to.throw Error, 'media query not provided'
+        expect(exercise).to.throw Error, 'query items not provided'
 
 
-    describe 'without a selector', ->
+    context 'with a query item', ->
 
-      it 'should throw an error', ->
-        exercise = ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+      describe 'without a media query', ->
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+        items = [{
+          selector: '.media, .background'
+          width: 800
+        }]
 
-          rig.generate fakeBlock, config, 'passthrough', {}, [{
-            query: '(max-width: 503px)'
-            width: 800
-          }]
+        it 'should throw an error', ->
+          exercise = ->
+            {block, config, graph} = fixtures
 
-        expect(exercise).to.throw Error, 'selector not provided'
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
 
-
-    describe 'without a width or height', ->
-
-      it 'should throw an error', ->
-        exercise = ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
-
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
-
-          rig.generate fakeBlock, config, 'passthrough', {}, [{
-            query: '(max-width: 503px)'
-            selector: '.media, .background'
-          }]
-
-        expect(exercise).to.throw Error, 'width or height not provided'
+          expect(exercise).to.throw Error, 'media query not provided'
 
 
-    describe 'specifying both width and height', ->
+      describe 'without a selector', ->
 
-      it 'should throw an error', ->
-        exercise = ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+        items = [{
+          query: '(max-width: 503px)'
+          width: 800
+        }]
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+        it 'should throw an error', ->
+          exercise = ->
+            {block, config, graph} = fixtures
 
-          rig.generate fakeBlock, config, 'gaussianblur', {}, [{
-            query: '(max-width: 503px)'
-            selector: '.media, .background'
-            width: 800
-            height: 450
-          }]
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
 
-        expect(exercise).to.throw Error, 'width or height must be provided, but not both'
+          expect(exercise).to.throw Error, 'selector not provided'
 
 
-    describe 'with a width larger than the original', ->
+      describe 'without a width or height', ->
 
-      it 'should use the original width', ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
-            width: 1600
-            height: 900
+        items = [{
+          query: '(max-width: 503px)'
+          selector: '.media, .background'
+        }]
 
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
+        it 'should throw an error', ->
+          exercise = ->
+            {block, config, graph} = fixtures
 
-        css = rig.generate fakeBlock, config, 'passthrough', {}, [{
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
+
+          expect(exercise).to.throw Error, 'width or height not provided'
+
+
+      describe 'specifying both width and height', ->
+
+        items = [{
+          query: '(max-width: 503px)'
+          selector: '.media, .background'
+          width: 800
+          height: 450
+        }]
+
+        it 'should throw an error', ->
+          exercise = ->
+            {block, config, graph} = fixtures
+
+            rig.generate
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              items: items
+
+          expect(exercise).to.throw Error, 'width or height must be provided, but not both'
+
+
+      describe 'with a width larger than the original', ->
+
+        items = [{
           query: '(max-width: 503px)'
           selector: '.media, .background'
           width: 1920
         }]
 
-        url = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 1600
-          height: 900
+        it 'should use the original width', ->
+          {block, config, graph} = fixtures
 
-        expect(css).to.equal """
-          @media (max-width: 503px) {
-            .media, .background {
-              background-image: url('#{url}');
-            }
-          }
-        """
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
-
-    describe 'with a height larger than the original', ->
-
-      it 'should use the original height', ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
             width: 1600
             height: 900
 
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
+          expect(css).to.equal """
+            @media (max-width: 503px) {
+              .media, .background {
+                background-image: url('#{url}');
+              }
+            }
+          """
 
-        css = rig.generate fakeBlock, config, 'passthrough', {}, [{
+
+      describe 'with a height larger than the original', ->
+
+        items = [{
           query: '(max-width: 503px)'
           selector: '.media, .background'
           height: 1200
         }]
 
-        url = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 1600
-          height: 900
+        it 'should use the original height', ->
+          {block, config, graph} = fixtures
 
-        expect(css).to.equal """
-          @media (max-width: 503px) {
-            .media, .background {
-              background-image: url('#{url}');
-            }
-          }
-        """
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
-
-  context 'with a valid block and query items', ->
-
-    describe 'providing widths', ->
-
-      it 'should generate media queries', ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
             width: 1600
             height: 900
 
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
+          expect(css).to.equal """
+            @media (max-width: 503px) {
+              .media, .background {
+                background-image: url('#{url}');
+              }
+            }
+          """
 
-        css = rig.generate fakeBlock, config, 'passthrough', {}, [{
+
+    context 'with a valid block and query items', ->
+
+      describe 'providing widths', ->
+
+        items = [{
           query: '(max-width: 503px)'
           selector: '.media, .background'
           width: 400
@@ -410,174 +322,26 @@ describe 'Responsive image generator', ->
           selector: '.media, .background'
           width: 800
         }]
-
-        firstUrl = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 400
-          height: 225
-
-        secondUrl = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 800
-          height: 450
-
-        expect(css).to.equal """
-          @media (max-width: 503px) {
-            .media, .background {
-              background-image: url('#{firstUrl}');
-            }
-          }
-
-          @media (min-width: 504px) and (max-width: 1007px) {
-            .media, .background {
-              background-image: url('#{secondUrl}');
-            }
-          }
-        """
-
-
-    describe 'providing heights', ->
-
-      it 'should generate media queries', ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
-            width: 1600
-            height: 900
-
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
-
-        css = rig.generate fakeBlock, config, 'passthrough', {}, [{
-          query: '(max-width: 503px)'
-          selector: '.media, .background'
-          height: 225
-        }, {
-          query: '(min-width: 504px) and (max-width: 1007px)'
-          selector: '.media, .background'
-          height: 450
-        }]
-
-        firstUrl = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 400
-          height: 225
-
-        secondUrl = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 800
-          height: 450
-
-        expect(css).to.equal """
-          @media (max-width: 503px) {
-            .media, .background {
-              background-image: url('#{firstUrl}');
-            }
-          }
-
-          @media (min-width: 504px) and (max-width: 1007px) {
-            .media, .background {
-              background-image: url('#{secondUrl}');
-            }
-          }
-        """
-
-
-    describe 'providing a mixture of widths and heights', ->
-
-      it 'should generate media queries', ->
-        fakeBlock =
-          type: 'media'
-          cover:
-            src: 'https://a.com/b.png'
-            width: 1600
-            height: 900
-
-        config =
-          server: 'https://imgflo.herokuapp.com/'
-          key: process.env.IMGFLO_KEY
-          secret: process.env.IMGFLO_SECRET
-
-        css = rig.generate fakeBlock, config, 'passthrough', {}, [{
-          query: '(max-width: 503px)'
-          selector: '.media, .background'
-          width: 400
-        }, {
-          query: '(min-width: 504px) and (max-width: 1007px)'
-          selector: '.media, .background'
-          height: 450
-        }]
-
-        firstUrl = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 400
-          height: 225
-
-        secondUrl = imgflo config, 'passthrough',
-          input: 'https://a.com/b.png'
-          width: 800
-          height: 450
-
-        expect(css).to.equal """
-          @media (max-width: 503px) {
-            .media, .background {
-              background-image: url('#{firstUrl}');
-            }
-          }
-
-          @media (min-width: 504px) and (max-width: 1007px) {
-            .media, .background {
-              background-image: url('#{secondUrl}');
-            }
-          }
-        """
-
-
-      describe 'using a more complex imgflo graph', ->
 
         it 'should generate media queries', ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+          {block, config, graph} = fixtures
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
 
-          params =
-            'std-dev-x': 15
-            'std-dev-y': 15
-
-          css = rig.generate fakeBlock, config, 'gaussianblur', params, [{
-            query: '(max-width: 503px)'
-            selector: '.media, .background'
-            width: 400
-          }, {
-            query: '(min-width: 504px) and (max-width: 1007px)'
-            selector: '.media, .background'
-            height: 450
-          }]
-
-          firstUrl = imgflo config, 'gaussianblur',
+          firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 400
             height: 225
-            'std-dev-x': 15
-            'std-dev-y': 15
 
-          secondUrl = imgflo config, 'gaussianblur',
+          secondUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 800
             height: 450
-            'std-dev-x': 15
-            'std-dev-y': 15
 
           expect(css).to.equal """
             @media (max-width: 503px) {
@@ -594,80 +358,237 @@ describe 'Responsive image generator', ->
           """
 
 
+      describe 'providing heights', ->
+
+        items = [{
+          query: '(max-width: 503px)'
+          selector: '.media, .background'
+          height: 225
+        }, {
+          query: '(min-width: 504px) and (max-width: 1007px)'
+          selector: '.media, .background'
+          height: 450
+        }]
+
+        it 'should generate media queries', ->
+          {block, config, graph} = fixtures
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
+
+          firstUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 400
+            height: 225
+
+          secondUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 800
+            height: 450
+
+          expect(css).to.equal """
+            @media (max-width: 503px) {
+              .media, .background {
+                background-image: url('#{firstUrl}');
+              }
+            }
+
+            @media (min-width: 504px) and (max-width: 1007px) {
+              .media, .background {
+                background-image: url('#{secondUrl}');
+              }
+            }
+          """
+
+
+      describe 'providing a mixture of widths and heights', ->
+
+        items = [{
+          query: '(max-width: 503px)'
+          selector: '.media, .background'
+          width: 400
+        }, {
+          query: '(min-width: 504px) and (max-width: 1007px)'
+          selector: '.media, .background'
+          height: 450
+        }]
+
+        it 'should generate media queries', ->
+          {block, config, graph} = fixtures
+
+          css = rig.generate
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            items: items
+
+          firstUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 400
+            height: 225
+
+          secondUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 800
+            height: 450
+
+          expect(css).to.equal """
+            @media (max-width: 503px) {
+              .media, .background {
+                background-image: url('#{firstUrl}');
+              }
+            }
+
+            @media (min-width: 504px) and (max-width: 1007px) {
+              .media, .background {
+                background-image: url('#{secondUrl}');
+              }
+            }
+          """
+
+
+        describe 'using a more complex imgflo graph', ->
+
+          graph = 'gaussianblur'
+
+          params =
+            'std-dev-x': 15
+            'std-dev-y': 15
+
+          it 'should generate media queries', ->
+            {block, config} = fixtures
+
+            css = rig.generate
+              block: block,
+              config: config,
+              graph: graph,
+              params: params,
+              items: [{
+                query: '(max-width: 503px)'
+                selector: '.media, .background'
+                width: 400
+              }, {
+                query: '(min-width: 504px) and (max-width: 1007px)'
+                selector: '.media, .background'
+                height: 450
+              }]
+
+            firstUrl = imgflo config, 'gaussianblur',
+              'std-dev-x': 15
+              'std-dev-y': 15
+              input: 'https://a.com/b.png'
+              width: 400
+              height: 225
+
+            secondUrl = imgflo config, 'gaussianblur',
+              'std-dev-x': 15
+              'std-dev-y': 15
+              input: 'https://a.com/b.png'
+              width: 800
+              height: 450
+
+            expect(css).to.equal """
+              @media (max-width: 503px) {
+                .media, .background {
+                  background-image: url('#{firstUrl}');
+                }
+              }
+
+              @media (min-width: 504px) and (max-width: 1007px) {
+                .media, .background {
+                  background-image: url('#{secondUrl}');
+                }
+              }
+            """
+
+
   describe 'breakpoints', ->
 
-    describe 'property param', ->
+    validate fixtures.block, fixtures.config, fixtures.graph, (block, config, graph) ->
+      rig.breakpoints
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        property: 'width'
+        selector: '.background'
+        breakpoints: [800, 1200]
+
+
+    describe 'property option', ->
 
       context 'not provided', ->
 
+        property = null
+
         it 'should throw an error', ->
           exercise = ->
-            fakeBlock =
-              type: 'text'
-              cover:
-                src: 'https://a.com/b.png'
-                width: 1600
-                height: 900
+            {block, config, graph} = fixtures
 
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.breakpoints fakeBlock, config, 'passthrough', {}, null, '.background', [800, 1200]
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: property
+              selector: '.background'
+              breakpoints: [800, 1200]
 
           expect(exercise).to.throw Error, 'property not provided'
 
 
       context 'invalid', ->
 
+        property = 'widt'
+
         it 'should throw an error', ->
           exercise = ->
-            fakeBlock =
-              type: 'text'
-              cover:
-                src: 'https://a.com/b.png'
-                width: 1600
-                height: 900
+            {block, config, graph} = fixtures
 
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.breakpoints fakeBlock, config, 'passthrough', {}, 'widt', '.background', [800, 1200]
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: property
+              selector: '.background'
+              breakpoints: [800, 1200]
 
           expect(exercise).to.throw Error, 'invalid property provided'
 
 
       context 'width', ->
 
+        property = 'width'
+
         it 'should generate media queries', ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+          {block, config, graph} = fixtures
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: property
+            selector: '.background'
+            breakpoints: [800, 1200]
 
-          css = rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', '.background', [800, 1200]
-
-          firstUrl = imgflo config, 'passthrough',
+          firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 799
             height: (799 / 1600) * 900
 
-          secondUrl = imgflo config, 'passthrough',
+          secondUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 1199
             height: (1199 / 1600) * 900
 
-          thirdUrl = imgflo config, 'passthrough',
+          thirdUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 1200
             height: (1200 / 1600) * 900
@@ -695,32 +616,31 @@ describe 'Responsive image generator', ->
 
       context 'height', ->
 
+        property = 'height'
+
         it 'should generate media queries', ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+          {block, config, graph} = fixtures
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: property
+            selector: '.background'
+            breakpoints: [300, 600]
 
-          css = rig.breakpoints fakeBlock, config, 'passthrough', {}, 'height', '.background', [300, 600]
-
-          firstUrl = imgflo config, 'passthrough',
+          firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: (299 / 900) * 1600
             height: 299
 
-          secondUrl = imgflo config, 'passthrough',
+          secondUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: (599 / 900) * 1600
             height: 599
 
-          thirdUrl = imgflo config, 'passthrough',
+          thirdUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: (600 / 900) * 1600
             height: 600
@@ -746,80 +666,77 @@ describe 'Responsive image generator', ->
           """
 
 
-    describe 'selector param', ->
+    describe 'selector option', ->
 
       context 'not provided', ->
 
+        selector = null
+
         it 'should throw an error', ->
           exercise = ->
-            fakeBlock =
-              type: 'text'
-              cover:
-                src: 'https://a.com/b.png'
-                width: 1600
-                height: 900
+            {block, config, graph} = fixtures
 
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', null, [800, 1200]
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: 'width'
+              selector: selector
+              breakpoints: [800, 1200]
 
           expect(exercise).to.throw Error, 'selector not provided'
 
 
-    describe 'breakpoints param', ->
+    describe 'breakpoints option', ->
 
       context 'not provided', ->
 
+        breakpoints = null
+
         it 'should throw an error', ->
           exercise = ->
-            fakeBlock =
-              type: 'text'
-              cover:
-                src: 'https://a.com/b.png'
-                width: 1600
-                height: 900
+            {block, config, graph} = fixtures
 
-            config =
-              server: 'https://imgflo.herokuapp.com/'
-              key: process.env.IMGFLO_KEY
-              secret: process.env.IMGFLO_SECRET
-
-            rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', '.background', null
+            rig.breakpoints
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              property: 'width'
+              selector: '.background'
+              breakpoints: breakpoints
 
           expect(exercise).to.throw Error, 'breakpoints not provided'
 
 
-      context 'unsorted', ->
+      context 'unordered', ->
 
-        it 'should generate media queries', ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+        breakpoints = [1200, 800]
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+        it 'should generate ordered media queries', ->
+          {block, config, graph} = fixtures
 
-          css = rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', '.background', [1200, 800]
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: 'width'
+            selector: '.background'
+            breakpoints: breakpoints
 
-          firstUrl = imgflo config, 'passthrough',
+          firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 799
             height: (799 / 1600) * 900
 
-          secondUrl = imgflo config, 'passthrough',
+          secondUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 1199
             height: (1199 / 1600) * 900
 
-          thirdUrl = imgflo config, 'passthrough',
+          thirdUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 1200
             height: (1200 / 1600) * 900
@@ -847,27 +764,26 @@ describe 'Responsive image generator', ->
 
       context 'length 1', ->
 
+        breakpoints = [800]
+
         it 'should generate media queries', ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+          {block, config, graph} = fixtures
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: 'width'
+            selector: '.background'
+            breakpoints: breakpoints
 
-          css = rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', '.background', [800]
-
-          firstUrl = imgflo config, 'passthrough',
+          firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 799
             height: (799 / 1600) * 900
 
-          secondUrl = imgflo config, 'passthrough',
+          secondUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 800
             height: (800 / 1600) * 900
@@ -889,32 +805,31 @@ describe 'Responsive image generator', ->
 
       context 'length 2', ->
 
+        breakpoints = [800, 1200]
+
         it 'should generate media queries', ->
-          fakeBlock =
-            type: 'media'
-            cover:
-              src: 'https://a.com/b.png'
-              width: 1600
-              height: 900
+          {block, config, graph} = fixtures
 
-          config =
-            server: 'https://imgflo.herokuapp.com/'
-            key: process.env.IMGFLO_KEY
-            secret: process.env.IMGFLO_SECRET
+          css = rig.breakpoints
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            property: 'width'
+            selector: '.background'
+            breakpoints: breakpoints
 
-          css = rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', '.background', [800, 1200]
-
-          firstUrl = imgflo config, 'passthrough',
+          firstUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 799
             height: (799 / 1600) * 900
 
-          secondUrl = imgflo config, 'passthrough',
+          secondUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 1199
             height: (1199 / 1600) * 900
 
-          thirdUrl = imgflo config, 'passthrough',
+          thirdUrl = imgflo config, graph,
             input: 'https://a.com/b.png'
             width: 1200
             height: (1200 / 1600) * 900
@@ -941,52 +856,56 @@ describe 'Responsive image generator', ->
 
 
     it 'should generate media queries', ->
-      fakeBlock =
+      block =
         type: 'media'
         cover:
           src: 'https://a.com/b.png'
           width: 2160
           height: 1215
 
-      config =
-        server: 'https://imgflo.herokuapp.com/'
-        key: process.env.IMGFLO_KEY
-        secret: process.env.IMGFLO_SECRET
-
+      {config, graph} = fixtures
       breakpoints = [576, 864, 1152, 1440, 1728, 2016]
-      css = rig.breakpoints fakeBlock, config, 'passthrough', {}, 'width', '.background', breakpoints
 
-      firstUrl = imgflo config, 'passthrough',
+      css = rig.breakpoints
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        property: 'width'
+        selector: '.background'
+        breakpoints: breakpoints
+
+      firstUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 575
         height: (575 / 2160) * 1215
 
-      secondUrl = imgflo config, 'passthrough',
+      secondUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 863
         height: (863 / 2160) * 1215
 
-      thirdUrl = imgflo config, 'passthrough',
+      thirdUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 1151
         height: (1151 / 2160) * 1215
 
-      fourthUrl = imgflo config, 'passthrough',
+      fourthUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 1439
         height: (1439 / 2160) * 1215
 
-      fifthUrl = imgflo config, 'passthrough',
+      fifthUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 1727
         height: (1727 / 2160) * 1215
 
-      sixthUrl = imgflo config, 'passthrough',
+      sixthUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 2015
         height: (2015 / 2160) * 1215
 
-      seventhUrl = imgflo config, 'passthrough',
+      seventhUrl = imgflo config, graph,
         input: 'https://a.com/b.png'
         width: 2016
         height: (2016 / 2160) * 1215
@@ -1034,3 +953,227 @@ describe 'Responsive image generator', ->
           }
         }
       """
+
+
+  describe 'srcset', ->
+
+    validate fixtures.block, fixtures.config, fixtures.graph, (block, config, graph) ->
+      rig.srcset
+        block: block
+        config: config
+        graph: graph
+        params: {}
+        breakpoints: [800, 1200]
+
+
+    describe 'breakpoints option', ->
+
+      context 'not provided', ->
+
+        breakpoints = null
+
+        it 'should throw an error', ->
+          exercise = ->
+            {block, config, graph} = fixtures
+
+            rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+          expect(exercise).to.throw Error, 'breakpoints not provided'
+
+
+      context 'unordered', ->
+
+        breakpoints = [600, 200]
+
+        it 'should generate ordered src and srcset attribute values', ->
+          {block, config, graph} = fixtures
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
+
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 1600
+            height: 900
+
+          firstUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 200
+            height: (200 / 1600) * 900
+
+          secondUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 600
+            height: (600 / 1600) * 900
+
+          expect(result.src).to.equal url
+          expect(result.srcset).to.equal "#{firstUrl} 200w, #{secondUrl} 600w"
+
+
+      context 'length 1', ->
+
+        breakpoints = [200]
+
+        it 'should generate src and srcset attribute values', ->
+          {block, config, graph} = fixtures
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
+
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 1600
+            height: 900
+
+          firstUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 200
+            height: (200 / 1600) * 900
+
+          expect(result.src).to.equal url
+          expect(result.srcset).to.equal "#{firstUrl} 200w"
+
+
+      context 'length 2', ->
+
+        breakpoints = [200, 600]
+
+        it 'should generate src and srcset attribute values', ->
+          {block, config, graph} = fixtures
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
+
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 1600
+            height: 900
+
+          firstUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 200
+            height: (200 / 1600) * 900
+
+          secondUrl = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 600
+            height: (600 / 1600) * 900
+
+          expect(result.src).to.equal url
+          expect(result.srcset).to.equal "#{firstUrl} 200w, #{secondUrl} 600w"
+
+
+      describe 'breakpoints equal to the image width', ->
+
+        breakpoints = [1600]
+
+        it 'should produce a single srcset entry equal the image width', ->
+          {block, config, graph} = fixtures
+
+          result = rig.srcset
+            block: block
+            config: config
+            graph: graph
+            params: {}
+            breakpoints: breakpoints
+
+          url = imgflo config, graph,
+            input: 'https://a.com/b.png'
+            width: 1600
+            height: 900
+
+          expect(result.src).to.equal url
+          expect(result.srcset).to.equal "#{url} 1600w"
+
+
+      describe 'breakpoints greater than the image width', ->
+
+        context 'single', ->
+
+          breakpoints = [2000]
+
+          it 'should produce a single srcset entry equal the image width', ->
+            {block, config, graph} = fixtures
+
+            result = rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+            url = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+            expect(result.src).to.equal url
+            expect(result.srcset).to.equal "#{url} 1600w"
+
+
+        context 'multiple', ->
+
+          breakpoints = [2000, 2400]
+
+          it 'should produce a single srcset entry equal the image width', ->
+            {block, config, graph} = fixtures
+
+            result = rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+            url = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+            expect(result.src).to.equal url
+            expect(result.srcset).to.equal "#{url} 1600w"
+
+
+      describe 'breakpoints less than, equal to, and greater than the image width', ->
+
+          breakpoints = [1200, 1600, 2000, 2400]
+
+          it 'should not produce srcset entries greater than the image width', ->
+            {block, config, graph} = fixtures
+
+            result = rig.srcset
+              block: block
+              config: config
+              graph: graph
+              params: {}
+              breakpoints: breakpoints
+
+            url = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1600
+              height: 900
+
+            firstUrl = imgflo config, graph,
+              input: 'https://a.com/b.png'
+              width: 1200
+              height: (1200 / 1600) * 900
+
+            expect(result.src).to.equal url
+            expect(result.srcset).to.equal "#{firstUrl} 1200w, #{url} 1600w"
