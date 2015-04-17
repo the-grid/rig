@@ -5,7 +5,8 @@
   "keywords": [
     "responsive",
     "responsive images",
-    "media queries"
+    "media queries",
+    "srcset"
   ],
   "homepage": "https://github.com/the-grid/rig",
   "bugs": "https://github.com/the-grid/rig/issues",
