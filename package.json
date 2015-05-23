@@ -2,6 +2,7 @@
   "name": "rig-up",
   "version": "0.3.3",
   "description": "Responsive image generator.",
+  "main": "lib/rig.js",
   "keywords": [
     "responsive",
     "responsive images",
@@ -20,7 +21,9 @@
     "url": "https://github.com/the-grid/rig.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha spec --compilers coffee:coffee-script/register --reporter spec"
+    "build": "npm run clean; ./node_modules/.bin/coffee --compile --output lib/ src/",
+    "clean": "mkdir -p lib; rm -r lib; mkdir lib",
+    "test": "npm run build; ./node_modules/.bin/mocha spec/**/*.coffee --compilers coffee:coffee-script/register --reporter spec"
   },
   "dependencies": {
     "imgflo-url": "^0.6.0"
@@ -32,11 +35,5 @@
   },
   "engines": {
     "node": "~0.10.26"
-  },
-  "browserify": {
-    "name": "rig-up",
-    "transform": [
-      "coffeeify"
-    ]
   }
 }

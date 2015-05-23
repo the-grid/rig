@@ -1,5 +1,5 @@
 {expect} = require 'chai'
-rig = require '../index'
+rig = require '../lib/rig'
 imgflo = require 'imgflo-url'
 
 
