@@ -117,8 +117,8 @@ describe 'Responsive image generator', ->
 
     config:
       server: 'https://imgflo.herokuapp.com/'
-      key: process.env.IMGFLO_KEY
-      secret: process.env.IMGFLO_SECRET
+      key: 'key'
+      secret: 'secret'
 
     graph: "passthrough"
 
