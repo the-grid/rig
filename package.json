@@ -29,9 +29,9 @@
     "imgflo-url": "^0.9.1"
   },
   "devDependencies": {
-    "chai": "3.3.0",
-    "coffee-script": "1.10.0",
-    "mocha": "3.1.2"
+    "chai": "^3.3.0",
+    "coffee-script": "^1.10.0",
+    "mocha": "^3.1.2"
   },
   "engines": {
     "node": ">= 4"
